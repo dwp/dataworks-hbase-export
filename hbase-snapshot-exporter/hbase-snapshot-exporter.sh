@@ -15,7 +15,7 @@ function sanitise_table_name() {
     SANITISED_TABLE_NAME=${SANITISED_TABLE_NAME//[$VALID_SNAPSHOT_NAME_REGEX]/}
     # lowercase
     SANITISED_TABLE_NAME=`echo -n $SANITISED_TABLE_NAME | tr A-Z a-z`
-    # appenddate
+    # append date
     SANITISED_TABLE_NAME="${SANITISED_TABLE_NAME}_${DATE}"
     echo $SANITISED_TABLE_NAME
 }
