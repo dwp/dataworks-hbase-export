@@ -1,7 +1,7 @@
 jobs:
   - name: pull-request
     plan:
-      - get: dataworks-hbase-export
+      - get: dataworks-hbase-export-pr
         resource: dataworks-hbase-export-pr
         trigger: true
         version: every
@@ -19,14 +19,12 @@ jobs:
           TF_WORKSPACE: "qa"
           DETAILED_EXITCODE: ""
         on_failure:
-          put: dataworks-hbase-export
-          resource: dataworks-hbase-export-pr
+          put: dataworks-hbase-export-pr
           params:
-            path: dataworks-hbase-export
+            path: dataworks-hbase-export-pr
             status: failure
         on_success:
-          put: dataworks-hbase-export
-          resource: dataworks-hbase-export-pr
+          put: dataworks-hbase-export-pr
           params:
-            path: dataworks-hbase-export
+            path: dataworks-hbase-export-pr
             status: success
