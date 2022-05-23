@@ -1,0 +1,32 @@
+jobs:
+  - name: pull-request
+    plan:
+      - get: dataworks-hbase-export
+        resource: dataworks-hbase-export-pr
+        trigger: true
+        version: every
+      - put: dataworks-hbase-export-pr
+        params:
+          path: dataworks-hbase-export-pr
+          status: pending
+      - .: (( inject meta.plan.terraform-bootstrap ))
+        input_mapping:
+          dataworks-hbase-export: dataworks-hbase-export-pr
+      - .: (( inject meta.plan.terraform-plan ))
+        input_mapping:
+          dataworks-hbase-export: dataworks-hbase-export-pr
+        params:
+          TF_WORKSPACE: "qa"
+          DETAILED_EXITCODE: ""
+        on_failure:
+          put: dataworks-hbase-export
+          resource: dataworks-hbase-export-pr
+          params:
+            path: dataworks-hbase-export
+            status: failure
+        on_success:
+          put: dataworks-hbase-export
+          resource: dataworks-hbase-export-pr
+          params:
+            path: dataworks-hbase-export
+            status: success

@@ -1,18 +1,18 @@
 spruce:
-  - base: ci/meta.yml
+  - base: ci/shared/meta.yml
     prune:
       - meta
     merge:
-      - with_in: ci/
+      - with_in: ci/shared/
         regexp: ".*.yml"
-      - with_in: ci/jobs/
+      - with_in: ci/jobs/hbase-export/
         regexp: ".*.yml"
     to: aviator_pipeline.yml
 fly:
-  name: dataworks-repo-template-terraform
+  name: dataworks-hbase-export
   target: aws-concourse
   config: aviator_pipeline.yml
   expose: true
   check_creds: true
   load_vars_from:
-    - ci/vars.yml
+    - ci/shared/vars.yml
