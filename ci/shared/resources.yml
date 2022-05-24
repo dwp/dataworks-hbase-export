@@ -1,28 +1,34 @@
 resources:
-  - name: dataworks-repo-template-terraform-pr
+  - name: dataworks-hbase-export
+    type: git
+    source:
+      branch: master
+      access_token: ((dataworks-secrets.concourse_github_pat))
+      uri: https://github.com/dwp/dataworks-hbase-export.git
+    check_every: 5m
+    webhook_token: ((dataworks.concourse_github_webhook_token))
+
+  - name: dataworks-hbase-export-pr
     type: pull-request
     source:
-      repository: dwp/dataworks-repo-template-terraform
+      repository: dwp/dataworks-hbase-export
       access_token: ((dataworks-secrets.concourse_github_pat))
     webhook_token: ((dataworks.concourse_github_webhook_token))
     check_every: 720h
 
-  - name: dataworks-repo-template-terraform
+  - name: dataworks-hbase-export-update-pipeline
     type: git
     source:
       branch: master
-      uri: https://github.com/dwp/dataworks-repo-template-terraform.git
-      access_token: ((dataworks-secrets.concourse_github_pat))
-    webhook_token: ((dataworks.concourse_github_webhook_token))
-    check_every: 720h
-
-  - name: dataworks-repo-template-terraform-update-pipeline
-    type: git
-    source:
-      branch: master
-      uri: https://github.com/dwp/dataworks-repo-template-terraform.git
+      uri: https://github.com/dwp/dataworks-hbase-export.git
       paths:
         - ci/*
         - aviator.yml
     webhook_token: ((dataworks.concourse_github_webhook_token))
     check_every: 720h 
+
+  # - name: meta-development
+  #   type: meta
+
+  # - name: meta-qa
+  #   type: meta

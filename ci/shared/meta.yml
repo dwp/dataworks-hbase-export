@@ -13,6 +13,7 @@ meta:
           TF_CLI_ARGS_apply: -lock-timeout=300s
           TF_CLI_ARGS_plan: -lock-timeout=300s
           TF_VAR_costcode: ((dataworks.costcode))
+
     terraform-bootstrap:
       task: terraform-bootstrap
       config:
@@ -28,15 +29,19 @@ meta:
           args:
             - -exc
             - |
+              if [ -f ../previous_success/exit-if-succeeded.sh ]; then
+                source ../previous_success/exit-if-succeeded.sh
+              fi
               python bootstrap_terraform.py
               cp terraform.tf ../terraform-bootstrap
-          dir: dataworks-repo-template-terraform
+          dir: dataworks-hbase-export
         inputs:
-          - name: dataworks-repo-template-terraform
+          - name: dataworks-hbase-export
         outputs:
           - name: terraform-bootstrap
       params:
         AWS_REGION: eu-west-2
+
     terraform-apply:
       task: terraform-apply
       .: (( inject meta.plan.terraform-common-config ))
@@ -46,15 +51,19 @@ meta:
           args:
             - -exc
             - |
+              if [ -f ../previous_success/exit-if-succeeded.sh ]; then
+                source ../previous_success/exit-if-succeeded.sh
+              fi
               cp ../terraform-bootstrap/terraform.tf .
               terraform workspace show
-              #ENABLE_BY_INITIAL_COMMIT terraform init
-              #ENABLE_BY_INITIAL_COMMIT terraform plan -out terraform.plan
-              #ENABLE_BY_INITIAL_COMMIT terraform apply -auto-approve terraform.plan
-          dir: dataworks-repo-template-terraform
+              terraform init
+              terraform plan -out terraform.plan
+              terraform apply -auto-approve terraform.plan
+          dir: dataworks-hbase-export
         inputs:
-          - name: dataworks-repo-template-terraform
+          - name: dataworks-hbase-export
           - name: terraform-bootstrap
+
     terraform-plan:
       task: terraform-plan
       .: (( inject meta.plan.terraform-common-config ))
@@ -64,15 +73,16 @@ meta:
           args:
             - -exc
             - |
+              if [ -f ../previous_success/exit-if-succeeded.sh ]; then
+                source ../previous_success/exit-if-succeeded.sh
+              fi
               cp ../terraform-bootstrap/terraform.tf .
               terraform workspace show
-              terraform init -backend=false; terraform validate #REMOVE_BY_INITIAL_COMMIT
-              #ENABLE_BY_INITIAL_COMMIT terraform init
-              #ENABLE_BY_INITIAL_COMMIT terraform plan $DETAILED_EXITCODE
-          dir: dataworks-repo-template-terraform
+              terraform init
+              terraform plan $DETAILED_EXITCODE
+          dir: dataworks-hbase-export
         inputs:
-          - name: dataworks-repo-template-terraform
+          - name: dataworks-hbase-export
           - name: terraform-bootstrap
       params:
         DETAILED_EXITCODE: -detailed-exitcode
-

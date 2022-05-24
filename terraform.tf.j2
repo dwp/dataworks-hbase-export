@@ -3,7 +3,7 @@ terraform {
 
   backend "s3" {
     bucket         = "{{terraform.state_file_bucket}}"
-    key            = "terraform/dataworks/dataworks-repo-template-terraform.tfstate"
+    key            = "terraform/dataworks/dataworks-hbase-export.tfstate"
     region         = "{{terraform.state_file_region}}"
     encrypt        = true
     kms_key_id     = "arn:aws:kms:{{terraform.state_file_region}}:{{terraform.state_file_account}}:key/{{terraform.state_file_kms_key}}"
@@ -29,6 +29,34 @@ provider "aws" {
   }
 }
 
+data "terraform_remote_state" "common" {
+  backend   = "s3"
+  workspace = terraform.workspace
+
+  config = {
+    bucket         = "{{terraform.state_file_bucket}}"
+    key            = "terraform/dataworks/common.tfstate"
+    region         = "{{terraform.state_file_region}}"
+    encrypt        = true
+    kms_key_id     = "arn:aws:kms:{{terraform.state_file_region}}:{{terraform.state_file_account}}:key/{{terraform.state_file_kms_key}}"
+    dynamodb_table = "remote_state_locks"
+  }
+}
+
+data "terraform_remote_state" "internal_compute" {
+  backend   = "s3"
+  workspace = terraform.workspace
+
+  config = {
+    bucket         = "{{terraform.state_file_bucket}}"
+    key            = "terraform/dataworks/aws-internal-compute.tfstate"
+    region         = "{{terraform.state_file_region}}"
+    encrypt        = true
+    kms_key_id     = "arn:aws:kms:{{terraform.state_file_region}}:{{terraform.state_file_account}}:key/{{terraform.state_file_kms_key}}"
+    dynamodb_table = "remote_state_locks"
+  }
+}
+
 module "dataworks_common" {
   source                = "{{terraform.dataworks_common_module_name}}"
   version               = "{{terraform.dataworks_common_module_version}}"
@@ -36,7 +64,7 @@ module "dataworks_common" {
 }
 
 locals {
-  name        = "dataworks-repo-template-terraform"
+  name        = "dataworks-hbase-export"
   environment = terraform.workspace == "default" ? "development" : terraform.workspace
 
   account = {
@@ -46,9 +74,9 @@ locals {
   }
 
   persistence_tag_value = {
-    development = "mon-fri,08:00-18:00"
+    development = "Ignore"
     qa          = "Ignore"
-    integration = "mon-fri,08:00-18:00"
+    integration = "Ignore"
     preprod     = "Ignore"
     production  = "Ignore"
   }
@@ -63,7 +91,7 @@ locals {
 
   overridden_tags = {
     Role         = "repo_template_terraform"
-    Owner        = "dataworks-repo-template-terraform"
+    Owner        = "dataworks-hbase-export"
     Persistence  = local.persistence_tag_value[local.environment]
     AutoShutdown = local.auto_shutdown_tag_value[local.environment]
   }

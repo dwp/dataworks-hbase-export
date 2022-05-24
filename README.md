@@ -1,4 +1,4 @@
-# dataworks-repo-template-terraform
+# dataworks-hbase-export
 
 ## Description
 
