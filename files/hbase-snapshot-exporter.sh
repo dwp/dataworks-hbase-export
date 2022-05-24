@@ -14,15 +14,15 @@ function sanitise_table_name() {
     # clean out anything that's not valid
     SANITISED_TABLE_NAME=${SANITISED_TABLE_NAME//[$VALID_SNAPSHOT_NAME_REGEX]/}
     # lowercase
-    SANITISED_TABLE_NAME=`echo -n $SANITISED_TABLE_NAME | tr A-Z a-z`
+    SANITISED_TABLE_NAME=`echo -n ${SANITISED_TABLE_NAME} | tr A-Z a-z`
     # append date
     SANITISED_TABLE_NAME="${SANITISED_TABLE_NAME}_${DATE}"
-    echo $SANITISED_TABLE_NAME
+    echo ${SANITISED_TABLE_NAME}
 }
 
 function valid_snapshot_name() {
     SNAPSHOT_NAME=$1
-    if ! [[ "$SNAPSHOT_NAME" =~ [$VALID_SNAPSHOT_NAME_REGEX] ]]; then
+    if ! [[ "${SNAPSHOT_NAME}" =~ [${VALID_SNAPSHOT_NAME_REGEX}] ]]; then
         return 0
     else
         return 1
@@ -56,7 +56,7 @@ function take_snapshot() {
 
 function export_snapshot() {
     echo "exporting snapshot ${SNAPSHOT_NAME} to ${EXPORT_LOCATION}"
-    hbase snapshot export -snapshot ${SNAPSHOT_NAME} -copy-to $EXPORT_LOCATION
+    hbase snapshot export -snapshot ${SNAPSHOT_NAME} -copy-to ${EXPORT_LOCATION}
     if [ $? != 0 ]; then
         echo "export failed. exiting..."
         exit 1
@@ -65,13 +65,13 @@ function export_snapshot() {
     fi
 }
 
-if [ -z $SNAPSHOT_NAME ]; then
+if [ -z ${SNAPSHOT_NAME} ]; then
     echo "No snapsnot name provided. Sanitising table name ${TABLE_NAME}"
-    SNAPSHOT_NAME=$(sanitise_table_name $TABLE_NAME)
+    SNAPSHOT_NAME=$(sanitise_table_name ${TABLE_NAME})
     echo "New snapshot name will be: ${SNAPSHOT_NAME}"
 fi
 
-if ! valid_snapshot_name $SNAPSHOT_NAME; then 
+if ! valid_snapshot_name ${SNAPSHOT_NAME}; then 
     echo "invalid snapshot name: ${SNAPSHOT_NAME}"
 fi
 
