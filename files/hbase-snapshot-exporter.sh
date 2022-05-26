@@ -2,6 +2,7 @@
 
 TABLE_NAME=$1
 EXPORT_LOCATION=$2
+SNAPSHOT_NAME=$3
 
 DATE=`date +"%Y%m%d"`
 VALID_SNAPSHOT_NAME_REGEX='^-.a-zA-Z_0-9'
@@ -42,7 +43,7 @@ function get_snapshot() {
 
 function take_snapshot() {
     if get_snapshot; then
-        echo "snapshot with name ${SNAPSHOT_NAME} already exists. exiting..."
+        echo "snapshot with name ${SNAPSHOT_NAME} already exists..."
         exit 1
     fi
 
