@@ -101,3 +101,33 @@ resource "aws_s3_bucket_policy" "hbase_export_bucket_https_only" {
   bucket     = aws_s3_bucket.hbase_export_bucket.id
   policy     = data.aws_iam_policy_document.hbase_export_bucket_https_only.json
 }
+
+data "aws_iam_policy_document" "hbase_s3_export" {
+  statement {
+    sid    = "PutExportBucket"
+    effect = "Allow"
+
+    actions = [
+      "kms:Encrypt",
+      "kms:Decrypt",
+      "kms:ReEncrypt*",
+      "kms:GenerateDataKey*",
+      "kms:DescribeKey",
+    ]
+
+    resources = [
+      aws_kms_key.hbase_export_s3.arn,
+    ]
+  }
+}
+
+resource "aws_iam_policy" "hbase_s3_export" {
+  name        = "IngestHbaseS3Export"
+  description = "Allow Ingestion EMR cluster to export HBASE tables to the export bucket"
+  policy      = data.aws_iam_policy_document.hbase_s3_export.json
+}
+
+resource "aws_iam_role_policy_attachment" "emr_ingest_hbase_main" {
+  role       = data.terraform_remote_state.internal_compute.outputs.emr_instance_role.id
+  policy_arn = aws_iam_policy.hbase_s3_export.arn
+}
