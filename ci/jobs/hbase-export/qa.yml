@@ -2,10 +2,14 @@ jobs:
   - name: qa
     max_in_flight: 1
     plan:
+      - get: meta
+        resource: meta-qa
       - get: dataworks-hbase-export
         trigger: true
         passed:
           - development
+      - get: dataworks-behavioural-framework
+        trigger: false
       - .: (( inject meta.plan.terraform-bootstrap ))
       - .: (( inject meta.plan.terraform-apply ))
         params:
@@ -13,3 +17,8 @@ jobs:
       - .: (( inject meta.plan.terraform-plan ))
         params:
           TF_WORKSPACE: 'qa'
+      - .: (( inject meta.plan.e2e-tests))
+        params:
+          TF_WORKSPACE: 'qa'
+          AWS_ACC: ((aws_account.qa))
+          AWS_ROLE_ARN: arn:aws:iam::((aws_account.qa)):role/ci
