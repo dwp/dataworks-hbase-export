@@ -21,7 +21,7 @@ jobs:
                 /usr/bin/aviator -f aviator.yml
                 mv aviator_pipeline.yml ../pipeline
                 mv ci/vars.yml ../pipeline
-            dir: dataworks-rhbase-export
+            dir: dataworks-hbase-export
           inputs:
             - name: dataworks-hbase-export
           outputs:
