@@ -30,7 +30,7 @@ data "aws_iam_policy_document" "hbase_export_s3_key_policy" {
 
     principals {
       type = "AWS"
-      identifiers = [for account in local.accounts : "arn:aws:iam::${account}:role/${data.terraform_remote_state.internal_compute.outputs.emr_instance_role.id}"]
+      identifiers = local.cross_account_roles
     }
 
     actions = ["kms:decrypt"]
