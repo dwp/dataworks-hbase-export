@@ -104,7 +104,7 @@ resource "aws_s3_bucket_public_access_block" "hbase_export" {
   ignore_public_acls      = true
 }
 
-data "aws_iam_policy_document" "hbase_export_bucket_https_only" {
+data "aws_iam_policy_document" "hbase_export_bucket_policy" {
   statement {
     sid     = "BlockHTTP"
     effect  = "Deny"
@@ -126,12 +126,29 @@ data "aws_iam_policy_document" "hbase_export_bucket_https_only" {
       variable = "aws:SecureTransport"
     }
   }
+
+  statement {
+    principals {
+      type        = "AWS"
+      identifiers = local.cross_account_roles
+    }
+
+    actions = [
+      "s3:GetObject",
+      "s3:ListBucket",
+    ]
+
+    resources = [
+      data.terraform_remote_state.hbase_export.outputs.hbase_export_bucket.arn,
+      "${data.terraform_remote_state.hbase_export.outputs.hbase_export_bucket.arn}/*",
+    ]
+  }
 }
 
-resource "aws_s3_bucket_policy" "hbase_export_bucket_https_only" {
+resource "aws_s3_bucket_policy" "hbase_export_bucket_policy" {
   depends_on = [aws_s3_bucket.hbase_export_bucket]
   bucket     = aws_s3_bucket.hbase_export_bucket.id
-  policy     = data.aws_iam_policy_document.hbase_export_bucket_https_only.json
+  policy     = data.aws_iam_policy_document.hbase_export_bucket_policy.json
 }
 
 data "aws_iam_policy_document" "hbase_s3_export" {
