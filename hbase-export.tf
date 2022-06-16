@@ -128,20 +128,22 @@ data "aws_iam_policy_document" "hbase_export_bucket_policy" {
   }
 
   statement {
-    principals {
-      type        = "AWS"
-      identifiers = local.cross_account_roles
-    }
-
+    sid     = "AllowCrossAccountRetrieval"
+    effect  = "Allow"
     actions = [
       "s3:GetObject",
       "s3:ListBucket",
     ]
 
     resources = [
-      data.terraform_remote_state.hbase_export.outputs.hbase_export_bucket.arn,
-      "${data.terraform_remote_state.hbase_export.outputs.hbase_export_bucket.arn}/*",
+      aws_s3_bucket.hbase_export_bucket.arn,
+      "${aws_s3_bucket.hbase_export_bucket.arn}/*",
     ]
+
+    principals {
+      type        = "AWS"
+      identifiers = local.cross_account_roles
+    }
   }
 }
 
