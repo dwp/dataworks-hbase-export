@@ -41,3 +41,6 @@ resources:
 
   - name: meta-qa
     type: meta
+
+  - name: meta-integration
+    type: meta

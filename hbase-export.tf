@@ -9,10 +9,42 @@ resource "aws_s3_bucket_object" "hbase_snapshot_exporter_script" {
   kms_key_id = data.terraform_remote_state.common.outputs.config_bucket_cmk.arn
 }
 
+data "aws_iam_policy_document" "hbase_export_s3_key_policy" {
+  statement {
+    sid = "Enable IAM User Permissions"
+    effect = "Allow"
+
+    principals {
+      type = "AWS"
+      identifiers = ["arn:aws:iam::${local.account[local.environment]}:root"]
+    }
+
+    actions = ["kms:*"]
+
+    resources = ["*"]
+  }
+
+  statement {
+    sid = "Allow Cross Account HBASE Ingest EMR Decrypt"
+    effect = "Allow"
+
+    principals {
+      type = "AWS"
+      identifiers = local.cross_account_roles
+    }
+
+    actions = ["kms:decrypt"]
+
+    resources = ["*"]
+  }
+}
+
 resource "aws_kms_key" "hbase_export_s3" {
   description             = "hbase-export-s3"
   enable_key_rotation     = true
   deletion_window_in_days = 7
+
+  policy = data.aws_iam_policy_document.hbase_export_s3_key_policy.json
 
   tags = { "Name" = "hbase-export-bucket", "ProtectSensitiveData" = "True" }
 
