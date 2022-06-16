@@ -3,7 +3,6 @@ groups:
     jobs:
       - development
       - qa
-      - integration
   - name: pull-request
     jobs:
       - pull-request
