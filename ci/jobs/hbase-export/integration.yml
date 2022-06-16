@@ -1,0 +1,24 @@
+jobs:
+    - name: integration
+      max_in_flight: 1
+      plan:
+        - get: meta
+          resource: meta-integration
+        - get: dataworks-hbase-export
+          trigger: true
+          passed:
+            - qa
+        - get: dataworks-behavioural-framework
+          trigger: false
+        - .: (( inject meta.plan.terraform-bootstrap ))
+        - .: (( inject meta.plan.terraform-apply ))
+          params:
+            TF_WORKSPACE: 'integration'
+        - .: (( inject meta.plan.terraform-plan ))
+          params:
+            TF_WORKSPACE: 'integration'
+        - .: (( inject meta.plan.e2e-tests))
+          params:
+            TF_WORKSPACE: 'integration'
+            AWS_ACC: ((aws_account.integration))
+            AWS_ROLE_ARN: arn:aws:iam::((aws_account.integration)):role/ci
